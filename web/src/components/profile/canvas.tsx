@@ -23,13 +23,18 @@ export default function Canvas({ user }: { user: User | null }) {
         // setUploadedImages(
         //   (prevImages: any) => [...prevImages, e.target?.result] as any
         // );
+        uploadImage(
+          file,
+          Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1),
+          Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1)
+        );
       };
       reader.readAsDataURL(file);
     }
   };
 
   const uploadImage = useCallback(
-    async (file: File, x: string, y: string) => {
+    async (file: File, x: number, y: number) => {
       if (!user) return;
 
       // upload image to the backend and fetch the ID
@@ -50,8 +55,8 @@ export default function Canvas({ user }: { user: User | null }) {
       formData.append("imageLink", uploadResponse);
       formData.append("username", user.id); // uploader id
       formData.append("album_id", "1");
-      formData.append("x", x);
-      formData.append("y", y);
+      formData.append("x", x.toString());
+      formData.append("y", y.toString());
 
       const response = await fetch(`/api/pictures`, {
         method: "POST",

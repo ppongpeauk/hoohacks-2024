@@ -25,13 +25,13 @@ export const getServerSideProps = (async ({ query }) => {
 }) satisfies GetServerSideProps<{ user: User | null }>;
 
 export default function Profile({ user }: { user: User | null }) {
-  const { user: firebaseUser, currentUser } = useAuthContext();
+  const { user: firebaseUser, currentUser, isAuthLoaded } = useAuthContext();
   const [focusedUser, setFocusedUser] = useState<User | null>(user);
   const { push } = useRouter();
 
   useEffect(() => {
     async function run() {
-      if (!firebaseUser) {
+      if (!firebaseUser && isAuthLoaded) {
         push("/");
         return;
       }
