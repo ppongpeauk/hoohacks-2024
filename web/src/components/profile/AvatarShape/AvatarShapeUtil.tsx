@@ -70,22 +70,13 @@ export class AvatarShapeUtil extends ShapeUtil<IAvatarShape> {
 
     return (
       <Box id={shape.id} style={styles.box}>
-        <Tooltip.Floating label="Click to edit" position="top">
-          <Image
-            src={shape.props.imageUrl}
-            alt="avatar"
-            width={256}
-            height={256}
-            style={styles.icon}
-          />
-        </Tooltip.Floating>
-        {/* <h2>Clicks: {count}</h2>
-        <button
-          // [b]
-          onClick={() => setCount((count) => count + 1)}
-          onPointerDown={(e) => e.stopPropagation()}>
-          {bounds.w.toFixed()}x{bounds.h.toFixed()}
-        </button> */}
+        <Image
+          src={shape.props.imageUrl}
+          alt="avatar"
+          width={256}
+          height={256}
+          style={styles.icon}
+        />
       </Box>
     );
   }
