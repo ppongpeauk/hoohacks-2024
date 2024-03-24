@@ -17,6 +17,7 @@ import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import PageLoadingBar from "@/components/PageLoadingBar";
 import { Spline_Sans_Mono } from "next/font/google";
+import AuthProvider from "@/contexts/AuthContext";
 const font = Spline_Sans_Mono({ subsets: ["latin"] });
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -53,11 +54,13 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         withCssVariables
         classNamesPrefix="eve"
         forceColorScheme="light">
-        <ModalsProvider>
-          <Notifications position="top-right" />
-          <PageLoadingBar />
-          {getLayout(<Component {...pageProps} />)}
-        </ModalsProvider>
+        <AuthProvider>
+          <ModalsProvider>
+            <Notifications position="top-right" />
+            <PageLoadingBar />
+            {getLayout(<Component {...pageProps} />)}
+          </ModalsProvider>
+        </AuthProvider>
       </MantineProvider>
     </>
   );
