@@ -5,6 +5,7 @@ import { GetServerSideProps } from "next/types";
 import { User } from "@/types";
 import { useEffect, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useRouter } from "next/router";
 
 const Canvas = dynamic(() => import("@/components/profile/canvas"), {
   ssr: false,
@@ -26,10 +27,15 @@ export const getServerSideProps = (async ({ query }) => {
 export default function Profile({ user }: { user: User | null }) {
   const { user: firebaseUser, currentUser } = useAuthContext();
   const [focusedUser, setFocusedUser] = useState<User | null>(user);
+  const { push } = useRouter();
 
   useEffect(() => {
-    if (!firebaseUser) return;
     async function run() {
+      if (!firebaseUser) {
+        push("/");
+        return;
+      }
+
       // Should only occur when user is self
       if (!user) {
         const token = (await firebaseUser?.getIdToken()) as string;
