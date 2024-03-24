@@ -3,9 +3,12 @@ import { Rectangle2d, ShapeUtil, TLOnResizeHandler, resizeBox } from "tldraw";
 import { polaroidShapeProps } from "./polaroid-shape-props";
 import { IPolaroidShape } from "./polaroid-shape-types";
 import { Box, Image } from "@mantine/core";
+import { useCanvasContext } from "@/contexts/CanvasContext";
 
 // Define a functional component for the Polaroid shape's appearance
 const PolaroidComponent = ({ shape }: { shape: IPolaroidShape }) => {
+  const { cid, setCid } = useCanvasContext();
+
   const styles = {
     box: {
       display: "flex",
@@ -13,6 +16,8 @@ const PolaroidComponent = ({ shape }: { shape: IPolaroidShape }) => {
       pointerEvents: "all",
       border: "2px solid #000",
       backgroundColor: "#fff",
+      opacity: cid === shape.props.cid || cid === -1 ? 1 : 0,
+      transition: "opacity 0.5s",
     },
     image: {
       pointerEvents: "none",
@@ -45,6 +50,7 @@ export class PolaroidShapeUtil extends ShapeUtil<IPolaroidShape> {
       name: "",
       username: "",
       pid: 0,
+      cid: 0,
     };
   }
 

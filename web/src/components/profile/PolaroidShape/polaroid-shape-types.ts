@@ -10,5 +10,6 @@ export type IPolaroidShape = TLBaseShape<
     name: string;
     username: string;
     pid: number;
+    cid: number;
   }
 >;

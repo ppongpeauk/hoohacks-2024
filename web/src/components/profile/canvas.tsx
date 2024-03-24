@@ -6,6 +6,7 @@ import { PolaroidShapeUtil } from "./PolaroidShape/PolaroidShapeUtil";
 import { User } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { notifications } from "@mantine/notifications";
+import { useCanvasContext } from "@/contexts/CanvasContext";
 
 const customShapeUtils = [AvatarShapeUtil, PolaroidShapeUtil];
 
@@ -30,6 +31,7 @@ export default function Canvas({
   const { user: firebaseUser, currentUser } = useAuthContext();
   const [uploadedImages, setUploadedImages] = useState([]);
   const editorRef = useRef(null) as any; // Ref to access the TldrawApp instance
+  const { cid, setCid } = useCanvasContext();
 
   // Handle file upload and convert to data URL
   const handleFileChange = (event: any) => {
@@ -127,6 +129,7 @@ export default function Canvas({
           props: {
             w: 512,
             h: 512,
+            cid: entry.cid,
             pid: entry.pid,
             imageUrl: "http://localhost:8080/api/storage/" + entry.fileLink,
             name: `Image ${index + 1}`,

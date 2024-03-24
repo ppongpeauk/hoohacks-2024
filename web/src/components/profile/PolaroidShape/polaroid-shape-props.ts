@@ -9,4 +9,5 @@ export const polaroidShapeProps: ShapeProps<IPolaroidShape> = {
   name: T.string,
   username: T.string,
   pid: T.number,
+  cid: T.number,
 };
