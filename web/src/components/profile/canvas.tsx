@@ -68,7 +68,7 @@ export default function Canvas({
         body: JSON.stringify({
           fileLink: uploadResponse,
           uid: 0,
-          cid: 1,
+          cid: -1,
           x: x.toString(),
           y: y.toString(),
           width: "0",
