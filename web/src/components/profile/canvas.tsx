@@ -105,9 +105,9 @@ const CustomCanvas = () => {
         // Additional Tldraw props and event handlers as needed
       />
 
-      {/* {showButton && (
+      {showButton && (
         <PlusButton position={mousePosition} onClick={handlePlusButtonClick} />
-      )} */}
+      )}
 
       <input
         ref={fileInputRef}
