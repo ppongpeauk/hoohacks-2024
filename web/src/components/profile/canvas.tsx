@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Tldraw } from "tldraw";
-import logo from "@/assets/images/user-example.png"; // Ensure this path is correct
+import tempAvatar from "@/assets/images/waleed.jpeg";
 import { AvatarShapeUtil } from "./AvatarShape/AvatarShapeUtil";
 import { PolaroidShapeUtil } from "./PolaroidShape/PolaroidShapeUtil";
 import { User } from "@/types";
@@ -9,7 +9,24 @@ import { notifications } from "@mantine/notifications";
 
 const customShapeUtils = [AvatarShapeUtil, PolaroidShapeUtil];
 
-export default function Canvas({ user }: { user: User | null }) {
+interface Response {
+  pid: number;
+  fileLink: string;
+  uid: number;
+  cid: number;
+  x: string;
+  y: string;
+  width: string;
+  height: string;
+}
+
+export default function Canvas({
+  data,
+  id,
+}: {
+  data: Response[] | null;
+  id: string;
+}) {
   const { user: firebaseUser, currentUser } = useAuthContext();
   const [uploadedImages, setUploadedImages] = useState([]);
   const editorRef = useRef(null) as any; // Ref to access the TldrawApp instance
@@ -35,16 +52,9 @@ export default function Canvas({ user }: { user: User | null }) {
 
   const uploadImage = useCallback(
     async (file: File, x: number, y: number) => {
-      if (!user) return;
-
       // upload image to the backend and fetch the ID
-      const token = await firebaseUser.getIdToken();
-      const uploadResponse = await fetch(`/api/pictures`, {
+      const uploadResponse = await fetch(`http://localhost:8080/api/storage`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": file.type,
-        },
         body: file,
       }).then((res) => res.text()); // should return the ID of the uploaded image
 
@@ -53,15 +63,15 @@ export default function Canvas({ user }: { user: User | null }) {
       // create the form data
       const formData = new FormData();
       formData.append("imageLink", uploadResponse);
-      formData.append("username", user.id); // uploader id
+      formData.append("username", firebaseUser?.uid); // uploader id
       formData.append("album_id", "1");
       formData.append("x", x.toString());
       formData.append("y", y.toString());
 
-      const response = await fetch(`/api/pictures`, {
+      const response = await fetch(`http://localhost:8080/api/pictures/add`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": file.type,
         },
         body: formData,
       });
@@ -85,38 +95,40 @@ export default function Canvas({ user }: { user: User | null }) {
   const fetchPolaroids = useCallback(async () => {
     if (!firebaseUser) return;
     const token = await firebaseUser.getIdToken();
-    const response = await fetch(`/api/pictures/of/${user?.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `http://localhost:8080/api/pictures/of/${firebaseUser?.uid}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     const data = await response.json();
-    setUploadedImages(data.polaroids);
-  }, [firebaseUser, user]);
+    setUploadedImages(data);
+  }, [firebaseUser, id]);
 
   useEffect(() => {
-    if (user) {
-      fetchPolaroids();
-    }
+    fetchPolaroids();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [id, firebaseUser]);
 
   // Effect to create a new Polaroid shape for each uploaded image
   useEffect(() => {
     if (uploadedImages.length > 0 && editorRef.current) {
       const editor = editorRef.current as any;
-      uploadedImages.forEach((imageUrl, index) => {
+      uploadedImages.forEach((entry: any, index) => {
+        console.log(entry);
         editor.createShape({
           type: "polaroid",
-          x: Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1),
-          y: Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1),
+          x: parseInt(entry.x),
+          y: parseInt(entry.y),
           isLocked: true, // Ensure the shape is draggable
           props: {
-            w: 128,
-            h: 158,
-            imageUrl: imageUrl,
+            w: 512,
+            h: 512,
+            imageUrl: "http://localhost:8080/api/storage/" + entry.fileLink,
             name: `Image ${index + 1}`,
             username: `user${index + 1}`,
           },
@@ -165,7 +177,7 @@ export default function Canvas({ user }: { user: User | null }) {
             props: {
               w: 256,
               h: 256,
-              imageUrl: user?.avatarUrl || "",
+              imageUrl: tempAvatar.src,
             },
           });
 

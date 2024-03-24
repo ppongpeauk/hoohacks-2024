@@ -11,23 +11,44 @@ const Canvas = dynamic(() => import("@/components/profile/canvas"), {
   ssr: false,
 });
 
-export const getServerSideProps = (async ({ query }) => {
+export const getServerSideProps = async ({ query }: any) => {
   if (!query.username) {
     return { props: { user: null } };
   }
   const username = query.username as string;
-  const res = await fetch(`http://localhost:3000/api/v1/users/${username[0]}`);
-  if (res.status === 404) {
+  let res = await fetch(
+    `http://localhost:8080/api/pictures/of/${username[0]}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!res.ok) {
     return { notFound: true };
   }
-  const user: User = await res.json();
-  return { props: { user } };
-}) satisfies GetServerSideProps<{ user: User | null }>;
+  res = await res.json();
+  return { props: { res } };
+};
+interface Response {
+  pid: number;
+  fileLink: string;
+  uid: number;
+  cid: number;
+  x: string;
+  y: string;
+  width: string;
+  height: string;
+}
 
-export default function Profile({ user }: { user: User | null }) {
+export default function Profile({ res }: { res: Response[] }) {
   const { user: firebaseUser, currentUser, isAuthLoaded } = useAuthContext();
-  const [focusedUser, setFocusedUser] = useState<User | null>(user);
-  const { push } = useRouter();
+  const [focusedUser, setFocusedUser] = useState<Response[] | null>(res);
+  const {
+    push,
+    query: { username },
+  } = useRouter() as any;
 
   useEffect(() => {
     async function run() {
@@ -37,26 +58,29 @@ export default function Profile({ user }: { user: User | null }) {
       }
 
       // Should only occur when user is self
-      if (!user) {
-        const token = (await firebaseUser?.getIdToken()) as string;
-        const res = await fetch("/api/v1/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await res.json();
-        console.log(data);
-        setFocusedUser(data);
-      }
+      // if (!res && firebaseUser) {
+      //   const token = (await firebaseUser?.getIdToken()) as string;
+      //   const res = await fetch(
+      //     `http://localhost:8080/api/pictures/of/${firebaseUser?.id}`,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${token}`,
+      //         "Content-Type": "application/json",
+      //       },
+      //     }
+      //   );
+      //   const data = await res.json();
+      //   console.log(data);
+      //   setFocusedUser(data);
+      // }
     }
     run();
-  }, [user, firebaseUser]);
+  }, [res, firebaseUser, isAuthLoaded]);
 
   return (
     <Box>
-      <Nav user={focusedUser} />
-      <Canvas user={focusedUser} />
+      <Nav />
+      <Canvas data={focusedUser} id={firebaseUser?.id} />
       <Affix position={{ bottom: 16, right: 16 }}>
         <Container>
           <Box

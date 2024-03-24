@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import logo from "@/assets/images/user-example.png";
+import { User } from "@/types";
 
 export default async function user(req: NextApiRequest, res: NextApiResponse) {
   res.status(200).json({

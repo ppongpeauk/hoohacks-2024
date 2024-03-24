@@ -12,15 +12,20 @@ import {
   UnstyledButton,
   Menu,
   rem,
+  Anchor,
 } from "@mantine/core";
 import { useRef } from "react";
-import { IconLogout } from "@tabler/icons-react";
+import { IconBrandTwitterFilled, IconLogout } from "@tabler/icons-react";
+import NextLink from "next/link";
+import { getAuth, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
+import { provider } from "@/utils/firebase";
 
 // Assets
 import logo from "@/assets/images/logo_1.jpg";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { User } from "@/types";
 import { modals } from "@mantine/modals";
+import { useRouter } from "next/router";
 
 const styles: { [key: string]: React.CSSProperties } = {
   outer: {
@@ -43,8 +48,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-export default function Nav({ user }: { user: User | null }) {
+export default function Nav() {
   const { currentUser, user: firebaseUser, signOut } = useAuthContext();
+  const { push } = useRouter();
 
   return (
     <Flex flex={1} pos={"absolute"}>
@@ -55,18 +61,52 @@ export default function Nav({ user }: { user: User | null }) {
         px={24}
         style={styles.container}>
         {/* <Image src={logo.src} alt="logo" width={100} height={50} /> */}
-        <Title order={4} style={{ color: "white" }}>
-          murality.
-        </Title>
+        <Anchor component={NextLink} href="/" style={{ color: "white" }}>
+          <Title order={4} style={{ color: "white" }}>
+            murality.
+          </Title>
+        </Anchor>
         {/* mural title */}
         <Text style={{ color: "white" }} ml={16}>
-          {user?.name || "Unknown"}&apos;s mural
+          Waleed Raza&apos;s canvas
         </Text>
         {/* login component */}
         <Flex align="center">
-          {currentUser ? (
-            <Button variant="subtle" color="white">
-              Login with Twitter
+          {!firebaseUser ? (
+            <Button
+              color="dark"
+              onClick={() => {
+                const auth = getAuth();
+                signInWithPopup(auth, provider)
+                  .then((result) => {
+                    // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
+                    // You can use these server side with your app's credentials to access the Twitter API.
+                    const credential =
+                      TwitterAuthProvider.credentialFromResult(result);
+                    const token = credential?.accessToken;
+                    const secret = credential?.secret;
+
+                    // The signed-in user info.
+                    const user = result.user;
+                    console.log(user);
+                    // IdP data available using getAdditionalUserInfo(result)
+                    // ...
+                    push("/canvas");
+                  })
+                  .catch((error) => {
+                    // Handle Errors here.
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // The email of the user's account used.
+                    const email = error.customData.email;
+                    // The AuthCredential type that was used.
+                    const credential =
+                      TwitterAuthProvider.credentialFromError(error);
+                    // ...
+                  });
+              }}
+              leftSection={<IconBrandTwitterFilled size={16} />}>
+              Log in with Twitter
             </Button>
           ) : (
             <Menu zIndex={1000} width={320}>

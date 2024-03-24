@@ -15,13 +15,20 @@ import {
   Image,
 } from "@mantine/core";
 import { useCallback } from "react";
-import { IconBrandTwitter, IconBrandTwitterFilled } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconArrowUpRight,
+  IconBrandTwitter,
+  IconBrandTwitterFilled,
+} from "@tabler/icons-react";
 import { useRouter } from "next/router";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const { push } = useRouter();
+  const { user } = useAuthContext();
 
   const providerPopup = useCallback(() => {
     const auth = getAuth();
@@ -64,12 +71,21 @@ export default function Home() {
             An infinite canvas for you and your friends to create memories.
           </Text>
           <Group>
-            <Button
-              color="dark"
-              onClick={providerPopup}
-              leftSection={<IconBrandTwitterFilled size={16} />}>
-              Log in with Twitter
-            </Button>
+            {!user ? (
+              <Button
+                color="dark"
+                onClick={providerPopup}
+                leftSection={<IconBrandTwitterFilled size={16} />}>
+                Log in with Twitter
+              </Button>
+            ) : (
+              <Button
+                color="dark"
+                onClick={() => push("/canvas")}
+                leftSection={<IconArrowUpRight size={16} />}>
+                Continue to Canvas
+              </Button>
+            )}
           </Group>
         </Stack>
       </Flex>

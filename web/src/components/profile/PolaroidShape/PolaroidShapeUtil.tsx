@@ -13,11 +13,11 @@ const PolaroidComponent = ({ shape }: { shape: IPolaroidShape }) => {
       pointerEvents: "all",
       border: "2px solid #000",
       backgroundColor: "#fff",
-      height: "100%",
     },
     image: {
       pointerEvents: "none",
-      borderBottom: "2px solid #000",
+      height: "100%",
+      objectFit: "cover",
     },
   } as Record<string, React.CSSProperties>;
 
@@ -39,8 +39,8 @@ export class PolaroidShapeUtil extends ShapeUtil<IPolaroidShape> {
 
   getDefaultProps(): IPolaroidShape["props"] {
     return {
-      w: 256,
-      h: 316,
+      w: 512,
+      h: 512,
       imageUrl: "",
       name: "",
       username: "",

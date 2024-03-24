@@ -56,7 +56,7 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         forceColorScheme="light">
         <AuthProvider>
           <ModalsProvider>
-            <Notifications position="top-right" />
+            <Notifications position="bottom-left" />
             <PageLoadingBar />
             {getLayout(<Component {...pageProps} />)}
           </ModalsProvider>
