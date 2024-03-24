@@ -52,7 +52,7 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         theme={theme}
         withCssVariables
         classNamesPrefix="eve"
-        forceColorScheme="dark">
+        forceColorScheme="light">
         <ModalsProvider>
           <Notifications position="top-right" />
           <PageLoadingBar />

@@ -28,11 +28,14 @@
     "@tiptap/starter-kit": "^2.2.4",
     "dayjs": "^1.11.10",
     "embla-carousel-react": "^8.0.0",
+    "konva": "^9.3.6",
     "next": "14.1.4",
     "nextjs-progressbar": "^0.0.16",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "2"
+    "react-konva": "^18.2.10",
+    "recharts": "2",
+    "tldraw": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",
