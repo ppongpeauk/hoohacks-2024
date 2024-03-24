@@ -58,22 +58,20 @@ export default function Canvas({
         body: file,
       }).then((res) => res.text()); // should return the ID of the uploaded image
 
-      console.log(uploadResponse);
-
-      // create the form data
-      const formData = new FormData();
-      formData.append("imageLink", uploadResponse);
-      formData.append("username", firebaseUser?.uid); // uploader id
-      formData.append("album_id", "1");
-      formData.append("x", x.toString());
-      formData.append("y", y.toString());
-
       const response = await fetch(`http://localhost:8080/api/pictures/add`, {
         method: "POST",
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": "application/json",
         },
-        body: formData,
+        body: JSON.stringify({
+          fileLink: uploadResponse,
+          uid: 0,
+          cid: 1,
+          x: x.toString(),
+          y: y.toString(),
+          width: "0",
+          height: "0",
+        }),
       });
 
       if (response.ok) {
@@ -121,13 +119,15 @@ export default function Canvas({
       uploadedImages.forEach((entry: any, index) => {
         console.log(entry);
         editor.createShape({
+          id: "shape:" + entry.fileLink,
           type: "polaroid",
           x: parseInt(entry.x),
           y: parseInt(entry.y),
-          isLocked: true, // Ensure the shape is draggable
+          isLocked: false, // Ensure the shape is draggable
           props: {
             w: 512,
             h: 512,
+            pid: entry.pid,
             imageUrl: "http://localhost:8080/api/storage/" + entry.fileLink,
             name: `Image ${index + 1}`,
             username: `user${index + 1}`,
@@ -139,6 +139,36 @@ export default function Canvas({
       setUploadedImages([]);
     }
   }, [uploadedImages]);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    // get all shapes positions every 5 seconds
+    const interval = setInterval(async () => {
+      const shapes = editorRef.current.getCurrentPageShapes();
+      console.log(shapes);
+
+      shapes.forEach(async (shape: any) => {
+        if (shape.type !== "avatar") {
+          const urlencoded = new URLSearchParams();
+          urlencoded.append("x", shape.x.toString());
+          urlencoded.append("y", shape.y.toString());
+          urlencoded.append("width", "0");
+          urlencoded.append("height", "0");
+          await fetch(
+            `http://localhost:8080/api/pictures/${shape.props?.pid?.toString()}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: urlencoded,
+            }
+          );
+        }
+      });
+    }, 5000);
+  }, [editorRef.current]);
 
   return (
     <div style={{ position: "fixed", inset: 0 }}>

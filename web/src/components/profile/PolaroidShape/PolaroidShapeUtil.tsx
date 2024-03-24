@@ -44,6 +44,7 @@ export class PolaroidShapeUtil extends ShapeUtil<IPolaroidShape> {
       imageUrl: "",
       name: "",
       username: "",
+      pid: 0,
     };
   }
 
