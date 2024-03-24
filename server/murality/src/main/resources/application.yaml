@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://
+    username: root
+    password:
+    hikari:
+      max-lifetime: 600000 # 10 mins => default wait_timeout of DB
+
+  servlet:
+    multipart: # upload boundary
+      enabled: true
+      max-file-size: 10240MB
+      max-request-size: 10240MB
+
+  main:
+    allow-bean-definition-overriding: true
+
+cloud:
+  aws:
+    credentials:
+      access-key: key
+      secret-key: key
+    region:
+      static: us-east-1
+    stack:
+      auto: on
+    bucket:
+      name: hoohacks
+
+  data:
+    mongodb:
+      uri: url
