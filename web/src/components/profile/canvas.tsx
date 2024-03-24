@@ -1,123 +1,99 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Tldraw } from "tldraw";
+import logo from "@/assets/images/user-example.png"; // Ensure this path is correct
 import { AvatarShapeUtil } from "./AvatarShape/AvatarShapeUtil";
 import { PolaroidShapeUtil } from "./PolaroidShape/PolaroidShapeUtil";
-import logo from "@/assets/images/user-example.png";
+import { User } from "@/types";
 
-// Define an interface for PlusButton props
-interface PlusButtonProps {
-  position: { x: number; y: number };
-  onClick: () => void;
-}
+const customShapeUtils = [AvatarShapeUtil, PolaroidShapeUtil];
 
-const PlusButton = ({ position, onClick }: PlusButtonProps) => {
-  const buttonStyle: React.CSSProperties = {
-    position: "absolute",
-    left: position.x,
-    top: position.y,
-    cursor: "pointer",
-    zIndex: 1000,
-    transform: "translate(-50%, -50%)",
-    background: "white",
-    border: "none",
-    borderRadius: "50%",
-    padding: "0.5rem",
-    fontSize: "1.5rem",
-    lineHeight: "1",
-    userSelect: "none",
+export default function Canvas({ user }: { user: User | null }) {
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const editorRef = useRef(null) as any; // Ref to access the TldrawApp instance
+
+  // Handle file upload and convert to data URL
+  const handleFileChange = (event: any) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImages(
+          (prevImages: any) => [...prevImages, e.target?.result] as any
+        );
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  return (
-    <button style={buttonStyle} onClick={onClick}>
-      +
-    </button>
-  );
-};
-
-const CustomCanvas = () => {
-  const [app, setApp] = useState<any | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [showButton, setShowButton] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleMouseMove = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const canvasRect = event.currentTarget.getBoundingClientRect();
-      setMousePosition({
-        x: event.clientX - canvasRect.left,
-        y: event.clientY - canvasRect.top,
+  // Effect to create a new Polaroid shape for each uploaded image
+  useEffect(() => {
+    if (uploadedImages.length > 0 && editorRef.current) {
+      const editor = editorRef.current as any;
+      uploadedImages.forEach((imageUrl, index) => {
+        editor.createShape({
+          type: "polaroid",
+          x: Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1),
+          y: Math.random() * 512 * (Math.random() < 0.5 ? -1 : 1),
+          isLocked: true, // Ensure the shape is draggable
+          props: {
+            w: 128,
+            h: 158,
+            imageUrl: imageUrl,
+            name: `Image ${index + 1}`,
+            username: `user${index + 1}`,
+          },
+        });
       });
-      setShowButton(true);
-    },
-    []
-  );
 
-  const handleMouseLeave = useCallback(() => {
-    setShowButton(false);
-  }, []);
+      // Clear the uploaded images state if desired
+      setUploadedImages([]);
+    }
+  }, [uploadedImages]);
 
-  const handlePlusButtonClick = useCallback(() => {
-    // This will trigger the file input
-    fileInputRef.current?.click();
-  }, []);
+  return (
+    <div style={{ position: "fixed", inset: 0 }}>
+      <input
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        id="file-upload"
+        onChange={handleFileChange}
+      />
 
-  // Handle file input change and create shape
-  const handleFileInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file && app) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
+      {/* <label
+        htmlFor="file-upload"
+        style={{
+          cursor: "pointer",
+          padding: "20px 10px",
+          border: "1px solid #ccc",
+        }}>
+        Upload Image
+      </label> */}
+
+      <Tldraw
+        // ref={editorRef} // Attach the ref to the Tldraw component
+        shapeUtils={customShapeUtils}
+        hideUi
+        onMount={(app) => {
+          editorRef.current = app; // Assign the TldrawApp instance to the ref
+
+          // Initial Avatar shape creation
           app.createShape({
-            type: "polaroid",
-            x: mousePosition.x,
-            y: mousePosition.y,
-            isLocked: false,
+            typeName: "shape",
+            type: "avatar",
+            x: 0,
+            y: 0,
+            isLocked: true,
             props: {
               w: 256,
               h: 256,
-              imageUrl: reader.result as string,
-              name: "Uploaded Image",
-              username: "uploader",
+              imageUrl: user?.avatarUrl || "",
             },
           });
-        };
-        reader.readAsDataURL(file);
-        // Reset the input after the file is read
-        event.target.value = "";
-      }
-    },
-    [app, mousePosition.x, mousePosition.y]
-  );
 
-  const customShapeUtils = [AvatarShapeUtil, PolaroidShapeUtil];
-
-  return (
-    <div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ position: "fixed", width: "100vw", height: "100vh" }} // Set a fixed height or make it dynamic as needed
-    >
-      <Tldraw
-        shapeUtils={customShapeUtils}
-        hideUi
-        onMount={setApp}
-        // Additional Tldraw props and event handlers as needed
-      />
-
-      {showButton && (
-        <PlusButton position={mousePosition} onClick={handlePlusButtonClick} />
-      )}
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        style={{ display: "none" }}
-        onChange={handleFileInputChange}
-        accept="image/*"
+          app.centerOnPoint({ x: 128, y: 128 });
+        }}
       />
     </div>
   );
-};
-
-export default CustomCanvas;
+}

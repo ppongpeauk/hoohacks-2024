@@ -62,7 +62,7 @@ export default function AuthProvider({
       },
     });
     const data = await response.json();
-    if (!data.user) {
+    if (!data) {
       notifications.show({
         message:
           "There was a problem fetching your user data. Please try again.",

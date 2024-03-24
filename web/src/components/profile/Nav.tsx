@@ -43,7 +43,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-export default function Nav({ user }: { user: User }) {
+export default function Nav({ user }: { user: User | null }) {
   const { currentUser, user: firebaseUser, signOut } = useAuthContext();
 
   return (
@@ -60,7 +60,7 @@ export default function Nav({ user }: { user: User }) {
         </Title>
         {/* mural title */}
         <Text style={{ color: "white" }} ml={16}>
-          Pete Pongpeauk&apos;s mural
+          {user?.name || "Unknown"}&apos;s mural
         </Text>
         {/* login component */}
         <Flex align="center">

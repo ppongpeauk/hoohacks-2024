@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Rectangle2d,
-  ShapeUtil,
-  TLOnResizeHandler,
-  resizeBox,
-} from "tldraw";
+import { Rectangle2d, ShapeUtil, TLOnResizeHandler, resizeBox } from "tldraw";
 import { polaroidShapeProps } from "./polaroid-shape-props";
 import { IPolaroidShape } from "./polaroid-shape-types";
 import { Box, Image } from "@mantine/core";
@@ -15,25 +10,20 @@ const PolaroidComponent = ({ shape }: { shape: IPolaroidShape }) => {
     box: {
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
       pointerEvents: "all",
+      border: "2px solid #000",
+      backgroundColor: "#fff",
+      height: "100%",
     },
     image: {
       pointerEvents: "none",
-      border: "2px solid #000",
+      borderBottom: "2px solid #000",
     },
   } as Record<string, React.CSSProperties>;
 
   return (
     <Box id={shape.id} style={styles.box}>
-      <Image
-        src={shape.props.imageUrl}
-        alt="polaroid"
-        width={shape.props.w}
-        height={shape.props.h}
-        style={styles.image}
-      />
+      <Image src={shape.props.imageUrl} alt="polaroid" style={styles.image} />
       {/* Add more polaroid-specific elements here if needed */}
     </Box>
   );
@@ -49,8 +39,8 @@ export class PolaroidShapeUtil extends ShapeUtil<IPolaroidShape> {
 
   getDefaultProps(): IPolaroidShape["props"] {
     return {
-      w: 300,
-      h: 300,
+      w: 256,
+      h: 316,
       imageUrl: "",
       name: "",
       username: "",
@@ -71,7 +61,14 @@ export class PolaroidShapeUtil extends ShapeUtil<IPolaroidShape> {
   }
 
   indicator(shape: IPolaroidShape): JSX.Element {
-    return <rect width={shape.props.w} height={shape.props.h} fill="none" stroke="blue" />;
+    return (
+      <rect
+        width={shape.props.w}
+        height={shape.props.h}
+        fill="none"
+        stroke="blue"
+      />
+    );
   }
 
   override onResize: TLOnResizeHandler<IPolaroidShape> = (shape, info) => {
