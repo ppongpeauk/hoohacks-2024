@@ -2,3 +2,8 @@
 .env.*
 .DS_Store
 node_modules
+/server/murality/.idea
+/server/murality/target
+server/murality/murality.iml
+server/murality/mvnw
+server/murality/mvnw.cmd
