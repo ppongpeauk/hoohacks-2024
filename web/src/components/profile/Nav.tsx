@@ -81,7 +81,7 @@ export default function Nav() {
               data={[
                 {
                   value: "-1",
-                  label: "All",
+                  label: "All Memories",
                 },
                 {
                   value: "1",
